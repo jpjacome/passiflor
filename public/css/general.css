@@ -1,0 +1,35 @@
+/* #REGION COLORS */
+
+:root{
+    --color-1: #F6F1DE;
+    --color-2: #853720;
+    --color-3: #A1966B;
+    --color-4: #062411;
+    --square-size: 0px; /* Start at 0px for overlay */
+    --overlay-opacity: 0.9;
+    --border-radius: 100%;
+    --navbar-hover-color: var(--color-2); /* Dynamic hover color, updated by JS */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Hedvig Letters Serif', serif;
+    font-weight: 100;
+    margin: 0;
+}
+
+p{
+    font-family: 'quicksand', sans-serif;
+    font-weight: 100;
+    margin: 0;
+}
+
+/* #ENDREGION COLORS */
+
+body{
+    margin: 0;
+}
+
+@font-face {
+    font-family: 'Calafia', sans-serif;
+    src: url(../fonts/Calafia-Regular.otf);
+}
