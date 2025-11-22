@@ -805,7 +805,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('bookingModal');
         const modalContainer = modal ? modal.querySelector('.modal-container') : null;
         const openBtns = [
-            ...document.querySelectorAll('.book-session-btn, .navbar-book-btn')
+            ...document.querySelectorAll('.book-session-btn, .navbar-book-btn, .consultation-btn')
         ];
         const closeBtn = modal ? modal.querySelector('.modal-close') : null;
         let lastFocusedElement = null;
@@ -926,6 +926,90 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (e.target === modal) closeModal();
             });
         }
+    })();
+
+    // === Consultation Form Submission ===
+    (function initConsultationForm() {
+        const form = document.getElementById('bookingForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get CSRF token from meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
+            if (!csrfToken) {
+                alert('Error de seguridad. Por favor, recarga la página.');
+                return;
+            }
+
+            // Get form data
+            const formData = {
+                fullName: form.querySelector('#fullName').value,
+                email: form.querySelector('#email').value,
+                phone: form.querySelector('#phone').value,
+                sessionType: form.querySelector('#sessionType').value,
+                message: form.querySelector('#message').value
+            };
+            // Include consent checkbox value (only include when checked so server sees it)
+            const consentEl = form.querySelector('#consent');
+            if (consentEl && consentEl.checked) {
+                formData.consent = '1';
+            }
+
+            // Disable submit button to prevent double submission
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.querySelector('.btn-text').textContent;
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.btn-text').textContent = 'Enviando...';
+
+            try {
+                const response = await fetch('/consultations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Success! Show success message
+                    alert('¡Gracias! Hemos recibido tu solicitud. Te contactaremos pronto por email.');
+                    
+                    // Reset form
+                    form.reset();
+                    
+                    // Close modal
+                    const closeBtn = document.querySelector('#bookingModal .modal-close');
+                    if (closeBtn) closeBtn.click();
+                } else {
+                    // Handle validation errors
+                    if (data.errors) {
+                        let errorMessage = 'Por favor, corrige los siguientes errores:\n\n';
+                        Object.values(data.errors).forEach(errors => {
+                            errors.forEach(error => {
+                                errorMessage += `• ${error}\n`;
+                            });
+                        });
+                        alert(errorMessage);
+                    } else {
+                        alert(data.message || 'Ocurrió un error. Por favor, inténtalo de nuevo.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error submitting consultation:', error);
+                alert('Ocurrió un error al enviar tu solicitud. Por favor, inténtalo de nuevo más tarde.');
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.btn-text').textContent = originalBtnText;
+            }
+        });
     })();    // Circle Overlay Animation and Interaction
     (function initCircleOverlay() {
         const circleOverlay = document.querySelector('.circle-overlay');

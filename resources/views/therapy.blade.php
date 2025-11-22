@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
-<x-head title="Passiflor – Regresa a Tu Ser Natural" />
+<x-head :title="$therapy->title ?? 'Passiflor – Regresa a Tu Ser Natural'" />
 <head>
     <link rel="stylesheet" href="{{ asset('css/therapy.css') }}">
+    @if(isset($therapy) && $therapy->cover_image)
+        <meta property="og:image" content="{{ asset('storage/' . $therapy->cover_image) }}" />
+    @endif
 </head>
 <body>
-    <div class="card-wrapper card-wrapper-1 ">
+    @php
+        // Compute view variables in-template defensively until moved to controller
+        $hero = isset($therapy) && $therapy->pages ? ($therapy->pages->firstWhere('type', 'hero') ?? $therapy->pages->first()) : null;
+        $otherPages = isset($therapy) && $therapy->pages ? $therapy->pages->filter(function($p){ return ($p->type ?? null) !== 'hero'; }) : collect();
+    @endphp
+
+    <div class="card-wrapper card-wrapper-1">
         <div class="header-wrapper">
             <div class="container container-1">
                 <svg class="header-logo fade-in-1" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="739px" height="739px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
@@ -65,385 +74,95 @@
         <div class="wrapper-1 ">
             <div class="container-1">
                 <div class="circles-wrapper-1 fade-in-1">
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
-                    <span class="circle"></span>
+                    {{-- keep same number of circles as the static copy --}}
+                    @for($i=0; $i<17; $i++)
+                        <span class="circle"></span>
+                    @endfor
                 </div>
                 <div class="circles-wrapper-2 fade-in-1">
                     <span class="circle"></span>
                     <span class="circle"></span>
                 </div>
                 <div class="circles-wrapper-3 fade-in-2">
-                    <h3 class="category" data-splitting>Planificación terapéutica</h3>
+                    {{-- subtitle for the hero comes from the hero page's subtitle --}}
+                    <h3 class="category" data-splitting>{{ $hero?->subtitle ?? '' }}</h3>
                 </div>
             </div>
             <div class="container-2 ">
-                <h3 class="pacient fade-in-2" data-splitting>Emma Egas Lara</h3>
-                <h1 class="title" data-splitting>Entrenamiento para ir al baño</h1>
+                <h3 class="pacient fade-in-2" data-splitting>{{ $therapy->assignedPatient?->name ?? '' }}</h3>
+                <h1 class="title" data-splitting>{{ $therapy->title ?? 'Sin título' }}</h1>
             </div>
         </div>
 
         <div class="wrapper-2 fade-in-3">
-            <span data-splitting>593979136467</span>
-            <span data-splitting>verordonezp@passiflor.org</span>
-        </div>    
-        
+            @if($therapy->therapist)
+                <span class="therapist-name" data-splitting>{{ $therapy->therapist->name }}</span>
+                <span data-splitting>{{ $therapy->therapist->phone ?? '' }}</span>
+                <span data-splitting>{{ $therapy->therapist->email ?? '' }}</span>
+            @elseif($therapy->author)
+                {{-- fallback to author contact if no therapist assigned --}}
+                <span class="therapist-name" data-splitting>{{ $therapy->author->name ?? '' }}</span>
+                <span data-splitting>{{ $therapy->author->phone ?? '' }}</span>
+                <span data-splitting>{{ $therapy->author->email ?? '' }}</span>
+            @else
+                @if(isset($hero->body))
+                    @foreach(explode("\n", $hero->body) as $line)
+                        <span data-splitting>{{ $line }}</span>
+                    @endforeach
+                @endif
+            @endif
+        </div>
     </div>
 
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>1</span>
+    {{-- Render other pages dynamically --}}
+    @foreach($otherPages as $page)
+        <div class="card-wrapper card-wrapper-2"> 
+            <div class="header-wrapper fadein">
+                <div class="container-1">
+                    <span>{{ $page->number ?? '' }}</span>
+                </div>
+                <div class="container-2">
+                    <h2 data-splitting>{{ $page->title }}</h2>
+                </div>
             </div>
-            <div class="container-2">
-                <h2 data-splitting>¿Está lista para dejar el pañal?</h2>
+            <div class="wrapper1 fadein">
+                @if($page->subtitle)
+                    <h3 class="comment" data-splitting>{{ $page->subtitle }}</h3>
+                @endif
             </div>
-        </div>
-        <div class="wrapper1 fadein">
-
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <p>Sigue este test rápido* y descubre si es un buen momento para iniciar el poopy training.</p>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-            <p class="text-note">*Ideal para niñas/os de 2 años.</p>
-        </div>
+            <div class="wrapper2 fadein">
+                @if($page->body)
+                    <ul class="list">
+                        <p>{!! nl2br(e($page->body)) !!}</p>
+                    </ul>
+                @elseif($page->list_items)
+                    <div class="wrapper2 fadein">
+                        <ul class="list">
+                            @foreach($page->list_items as $li)
+                                <li>{{ $li }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+            @if($page->image)
+                <div class="wrapper-image fadein">
+                    <img src="{{ asset('storage/' . $page->image) }}" alt="{{ $page->title }}" style="max-width:100%;height:auto;" />
+                </div>
+            @endif
+            <div class="wrapper3 fadein">
+                @if($page->note)
+                    <p class="text-note">{{ $page->note }}</p>
+                @endif
+            </div>
 
             <div class="border">            
                 <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
             </div>
 
-    </div>
+        </div>
+    @endforeach
 
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>2</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Esperar el momento adecuado</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Empezar muy pronto puede generar frustración.</li>
-                <li>Empezar con señales claras de preparación evita traumas.</li>
-                <li>Cada niño/a tiene su ritmo.</li>
-                <li>Observa, no apresures.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-            <p class="text-note">*Ideal para niñas/os de 2 años.</p>
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>3</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Señales físicas de preparación</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Permanece seca por 2+ horas seguidas.</li>
-                <li> Hace popó a horarios previsibles.</li>
-                <li> Se esconde o avisa antes de evacuar.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>4</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Habilidades básicas necesarias</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting>Observa si muestra estas actitudes</h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Caminar y sentarse sola/o.</li>
-                <li>Bajar sus pantalones con ayuda.</li>
-                <li>Seguir instrucciones simples.</li>
-                <li>Imitar a otros usando el baño.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>5</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Interés emocional y disposición</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting>Observa si muestra estas actitudes:</h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Se interesa por el orinal o el baño.</li>
-                <li>Le molesta el pañal sucio.</li>
-                <li> Acepta elogios con alegría.</li>
-                <li> Se siente segura probando rutinas nuevas.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-  <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>6</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>¿Qué pasa en casa?</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting>El entorno también influye:</h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>No hay grandes cambios recientes(mudanzas, hermanos, etc.).</li>
-                <li>Tienes tiempo y paciencia para acompañar.</li>
-                <li>Hay un orinal visible y accesible.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-     <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>7</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting> ¿Qué hacer con los resultados?</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting></h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Muchos Sí: Comienza con el entrenamiento suave y estructurado.</li>
-                <li>Tienes tiempo y paciencia para acompañar.</li>
-                <li>Hay un orinal visible y accesible.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>8</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Señales normales en el proceso </h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting>(cosas que pueden pasar y
- no deben preocuparte):</h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Accidentes ocasionales.</li>
-                <li>Retención del popó unos días.</li>
-                <li>Hay un orinal visible y accesible.</li>
-                <li>Cambios leves en el horario.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-       <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>9</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Cuándo detener el entrenamiento</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting>Señales para pausar el proceso:</h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Llanto intenso o miedo al orinal.</li>
-                <li>Estreñimiento con dolor.</li>
-                <li>Rechazo firme y sostenido.</li>
-                <li>Retrocesos en otras áreas (sueño, apetito, juego).</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-    </div>
-
-        <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>10</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Tips extra del enfoque respetuoso</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting></h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Nunca forzar.</li>
-                <li>Celebrar los pequeños logros.</li>
-                <li>Ser constante pero flexible.</li>
-                <li> Anticipar lo sensorial (olor, papel, espacio).</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-            <p class="text-note">*Basado en Autistic Logistics y la AAP.</p>
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>11</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting> Recursos visuales recomendados</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting>Usa pictogramas para ayudarle a anticipar el paso a paso:</h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <li>Sentarse.</li>
-                <li>Hacer popó.</li>
-                <li>Limpiarse.</li>
-                <li>Vaciar.</li>
-                <li>Lavarse las manos.</li>
-                <li>Celebrar con una estrellita.</li>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
-    <div class="card-wrapper card-wrapper-2 "> 
-        <div class="header-wrapper fadein">
-            <div class="container-1">
-                <span>12</span>
-            </div>
-            <div class="container-2">
-                <h2 data-splitting>Cada proceso es único.</h2>
-            </div>
-        </div>
-        <div class="wrapper1 fadein">
-            <h3 class="comment" data-splitting></h3>
-        </div>
-        <div class="wrapper2 fadein">
-            <ul class="list">
-                <p> Confía en tu peque, observa sin prisa y honra el ritmo de su cuerpo y emociones.</p>
-            </ul>
-        </div>
-        <div class="wrapper3 fadein">
-        </div>
-
-            <div class="border">            
-                <img class="border-img" src="{{ asset('imgs/icon4.svg') }}" alt="border image" class="border-img">
-            </div>
-
-    </div>
-
+    <script src="{{ asset('js/therapy.js') }}"></script>
 </body>
-<script src="{{ asset('js/therapy.js') }}"></script>
-</html> 
+</html>

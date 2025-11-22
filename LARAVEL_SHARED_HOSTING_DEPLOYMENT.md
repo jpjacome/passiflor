@@ -14,6 +14,7 @@ If you already have your CSS and JS files ready in the `public/` folder, you can
 
 There are two common ways to host one or more Laravel projects on shared hosting:
 
+
 ### A. Each Project in Its Own Subfolder (Recommended for Multiple Projects)
 
 - Place each Laravel project in its own subfolder under your home directory (e.g., `/home/username/project1`, `/home/username/project2`).
@@ -22,6 +23,13 @@ There are two common ways to host one or more Laravel projects on shared hosting
 - This keeps projects isolated and avoids conflicts.
 - If you want to access via subfolder (e.g., `yourdomain.com/project1`), copy the contents of each project's `public` folder into a subfolder inside `public_html` (e.g., `public_html/project1/`).
 - In this case, you may need to update the `index.php` in each subfolder to point to the correct paths for `vendor` and `bootstrap` (see below).
+
+**Do NOT upload these folders/files to your server for each project:**
+- `node_modules/`
+- `tests/`
+- `.git/`
+- `.env.example`
+- Any local-only files or folders not needed for production
 
 ### B. Single Project in Root (Not recommended for multiple projects)
 

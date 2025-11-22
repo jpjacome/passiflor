@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
         fadeinElements.forEach(el => observer.observe(el));
     }
 
-    // Existing h1 animation
+    // Existing h1 animation with pre-animate class for smooth fade-in
     const h1 = document.querySelector('h1[data-splitting]');
     if (h1 && typeof Splitting !== 'undefined' && typeof anime !== 'undefined') {
-        // First split by words, then split each word by chars
+        h1.classList.add('pre-animate');
         const results = Splitting({ target: h1, by: 'words' });
         if (results && results.length > 0) {
             const words = h1.querySelectorAll('.word');
@@ -29,13 +29,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (chars.length > 0) {
                 anime.set(chars, {
                     opacity: 0,
-                    translateY: 30,
+                    translateY: 10,
                     scale: 0.3,
                     rotateZ: 15,
                     filter: 'blur(5px)'
                 });
-                // Ensure browser renders initial state before animating
+                // Remove pre-animate class right before animating
                 setTimeout(function() {
+                    h1.classList.remove('pre-animate');
                     anime({
                         targets: chars,
                         opacity: 1,
@@ -45,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         filter: 'blur(0px)',
                         duration: 1200,
                         delay: function(el, i) {
-                            // Match home.js wave effect
                             const waveDelay = Math.sin(i * 0.3) * 50;
                             return 100 + (i * 25) + waveDelay;
                         },

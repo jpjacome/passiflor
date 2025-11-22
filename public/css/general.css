@@ -8,7 +8,7 @@
     --square-size: 0px; /* Start at 0px for overlay */
     --overlay-opacity: 0.9;
     --border-radius: 100%;
-    --navbar-hover-color: var(--color-2); /* Dynamic hover color, updated by JS */
+    --navbar-hover-color: var(--color-1); /* Dynamic hover color, updated by JS */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -32,4 +32,413 @@ body{
 @font-face {
     font-family: 'Calafia', sans-serif;
     src: url(../fonts/Calafia-Regular.otf);
+}
+
+/* ========================================
+   HEADER & NAVBAR STYLES (SHARED)
+   ======================================== */
+
+/* Main Navbar */
+.main-navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    max-width: 100vw;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-2);
+    box-sizing: border-box;
+    color: var(--color-2);
+    gap: 10px;
+    border-bottom: solid .5px rgb(0 0 0 / 9%);
+    z-index: 1001; /* NAVBAR ABOVE OVERLAY */
+    transition: background-color 0.3s ease, border-bottom-color 0.3s ease;
+}
+
+.main-navbar:hover .navbar-logo {        
+    animation: borderRotate 12s linear infinite;
+}
+
+@keyframes borderRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.navbar-logo {
+    height: 70px;
+    width: auto;
+    display: block;
+    margin: 0 3rem;
+}
+
+.navbar-title {
+    font-family: 'ZCOOL XiaoWei', cursive;
+    font-size: clamp(2vw, 2.4rem, 50px);
+    margin: 0;
+    font-weight: 500;
+    color: var(--color-1);
+    transition: color 0.3s ease;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    letter-spacing: .2em;
+}
+
+/* Navbar menu styles */
+.navbar-menu {
+    display: flex !important;
+    gap: 2rem;
+    align-items: center;
+    margin: 0 2rem;
+}
+
+.navbar-link {
+    color: var(--color-1);
+    font-family: 'Quicksand', sans-serif;
+    font-size: clamp(12px, 1rem, 3vw);
+    padding: 5px 10px;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 35px;
+    letter-spacing: 0.02em;
+    pointer-events: auto;
+    transition: color 0.3s ease, background-color 0.2s ease;
+}
+
+.navbar-link:hover,
+.navbar-link:focus {
+    color: var(--color-1)!important;
+    background-color: var(--color-3);
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Navbar Actions Container - Parent for social icons and book button */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+/* Navbar Social Icons */
+.navbar-social {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.navbar-social a {
+    color: var(--color-1);
+    font-size: 1.5rem;
+    transition: color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    padding: 0.3rem;
+    border-radius: 50%;
+}
+
+.navbar-social a:hover {
+    color: var(--navbar-hover-color) !important;
+    transform: scale(1.15);
+    background: rgba(255, 252, 224, 0.1);
+}
+
+/* Navbar Login Link - styled like social icons */
+.navbar-social .navbar-login-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    margin-left: 1rem;
+    padding: 0.3rem;
+    border-radius: 50%;
+    color: var(--color-1);
+    font-size: 1.5rem;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-login-link:hover {
+    color: var(--navbar-hover-color) !important;
+    transform: scale(1.15);
+    background: rgba(255, 252, 224, 0.1);
+}
+
+/* Navbar Logout Button - styled like social icons */
+.navbar-logout-link {
+    background: none;
+    border: none;
+    color: var(--color-1);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem;
+    border-radius: 50%;
+}
+
+.navbar-logout-link:hover {
+    color: var(--navbar-hover-color) !important;
+    transform: scale(1.15);
+    background: rgba(255, 252, 224, 0.1);
+}
+
+/* Navbar Book Button */
+.navbar-book-btn {
+    position: relative;
+    display: inline-flex;
+    width: 190px;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1.8rem;
+    font-family: 'Quicksand', sans-serif;
+    font-size: clamp(16px, 1.5rem, 3vw);
+    font-weight: 500;
+    color: var(--color-1);
+    background: var(--color-2);
+    border: none;
+    border-radius: 35px;    
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1), background 0s;
+    box-shadow: 
+        0 6px 12px rgba(133, 55, 32, 0.2),
+        0 3px 3px rgba(133, 55, 32, 0.1),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.1);    
+    transform: translateY(0);
+    height: 50px;
+    margin-right: 1rem;
+}
+
+.navbar-book-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #a64f35 0%, #9b3d28 100%);
+    box-shadow: 
+        0 12px 24px rgba(133, 55, 32, 0.3),
+        0 8px 8px rgba(133, 55, 32, 0.2),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-book-btn:active {
+    transform: translateY(-1px);
+    transition: all 0.1s ease;
+}
+
+.navbar-book-btn .btn-text {
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+    font-size: clamp(18px, 1rem, 5vw);
+}
+
+.navbar-book-btn:hover .btn-text {
+    transform: scale(1);
+    letter-spacing: 0.3px;
+}
+
+/* Focus styles for navbar button */
+.navbar-book-btn:focus {
+    outline: 2px solid rgba(161, 150, 107, 0.4);
+    outline-offset: 2px;
+}
+
+.navbar-book-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+    display: none;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem;
+    background: var(--color-2);
+    border: none;
+    border-radius: 35px;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(133, 55, 32, 0.2), 0 3px 3px rgba(133, 55, 32, 0.1), inset 0 -1px 3px rgba(0, 0, 0, 0.1);
+    height: 50px;
+    width: auto;
+    min-width: 50px;
+    margin: 0 1rem;
+}
+
+.hamburger-menu:hover,
+.hamburger-menu:focus {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #a64f35 0%, #9b3d28 100%);
+    box-shadow: 
+        0 12px 24px rgba(133, 55, 32, 0.3),
+        0 8px 8px rgba(133, 55, 32, 0.2),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.hamburger-menu span {
+    display: block;
+    height: 3px;
+    width: 29px;
+    margin: 4.5px 0;
+    background: var(--color-1);
+    border-radius: 2px;
+}
+
+/* Hamburger icon: single line state when clicked */
+.hamburger-menu.hamburger-clicked span {
+    position: absolute;
+    opacity: 1;
+    pointer-events: none;
+    transform: rotate(-45deg);
+}
+
+.hamburger-menu.hamburger-clicked span:nth-child(2) {
+    opacity: 1;
+    pointer-events: auto;
+    margin: 0;
+    transform: rotate(45deg);
+}
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(133, 55, 32, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 900;
+    transition: all 0.3s ease;
+}
+
+/* Hide mobile menu on desktop screens */
+@media (min-width: 951px) {
+    .mobile-menu-overlay {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+}
+
+.mobile-menu-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mobile-menu-overlay.menu-inactive {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.mobile-menu-overlay.menu-active {
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.mobile-menu-container {
+    backdrop-filter: blur(1px);
+    background-image: linear-gradient(45deg, var(--color-2), transparent);
+    border-radius: 20px;
+    width: 100vw;
+    height: 100vh;
+    box-shadow: 0 25px 50px rgba(133, 55, 32, 0.3), 0 10px 20px rgba(133, 55, 32, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    opacity: 1;
+    transform: scale(0.7) translateY(50px);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    justify-content: center;
+}
+
+.mobile-menu-overlay.open .mobile-menu-container {
+    transform: scale(1) translateY(0);
+}
+
+/* Remove mobile menu close button styles */
+.mobile-menu-close {
+    display: none !important;
+}
+
+/* Mobile menu link styles */
+.mobile-menu-container .navbar-link {
+    display: block;
+    margin: 1.2rem 0;
+    font-size: 1.2rem;
+    color: var(--color-1);
+    background: none;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+.mobile-menu-container .navbar-link:hover,
+.mobile-menu-container .navbar-link:focus {
+    color: var(--color-2);
+    background: var(--color-1);
+}
+
+/* Prevent scroll-based color changes for mobile menu overlay links */
+.mobile-menu-overlay .navbar-link {
+    color: var(--color-1) !important;
+    background: none !important;
+    transition: none !important;
+}
+
+.mobile-menu-overlay .navbar-link:hover,
+.mobile-menu-overlay .navbar-link:focus {
+    color: var(--color-2) !important;
+    background: var(--color-1) !important;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 950px) {
+    .hamburger-menu {
+        display: flex;
+        flex-direction: column;
+        height: 38px !important;
+        min-width: 38px !important;
+        padding: 0.3rem !important;
+    }
+    
+    .main-navbar .navbar-link {
+        display: none!important;
+    }
+    
+    .navbar-actions {
+        display: flex !important;
+        align-items: center;
+        gap: 1rem;
+        margin-left: auto;
+    }
+    
+    .navbar-social {
+        display: none !important;
+    }
+    
+    .navbar-book-btn {
+        display: inline-flex !important;
+        position: relative !important;
+        margin-right: 0.5rem !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 1002;
+    }
 }

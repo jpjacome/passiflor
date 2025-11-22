@@ -1,61 +1,246 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Passiflor
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**"Regresa a Tu Ser Natural"**
 
-## About Laravel
+Passiflor is a comprehensive therapy practice management platform built for a collective of psychologists committed to helping individuals reconnect with their natural selves. The application provides a complete solution for managing therapists, patients, personalized therapy sessions, and online consultations.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## About Passiflor
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+In a world that often takes us away from ourselves, Passiflor offers a way back. We are a **collective of psychologists** committed to helping you reconnect with your **natural self**—that part of you that exists beyond roles, expectations, and noise.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Here, **growth is constant**, **healing has solid foundations**, and knowledge is a quiet return to what has always been within you.
 
-## Learning Laravel
+## Key Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🧠 Therapy Management System
+- **Personalized Therapy Pages**: Create dynamic, patient-specific therapy content with customizable sections
+- **Multi-page Therapy Sessions**: Hero sections with step-by-step guidance and informational content
+- **Therapist Assignment**: Link therapies to specific therapists and patients
+- **Draft & Published States**: Preview unpublished therapies before making them public
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 👥 User Role Management
+- **Four User Roles**: Admin, Therapist, Patient, Guest
+- **Therapist-Patient Relationships**: Assign patients to therapists for personalized care
+- **Role-based Authorization**: Granular permissions using Laravel policies
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 📅 Consultation Booking System
+- **Free 15-Minute Consultations**: Online booking form for initial consultations
+- **Email Notifications**: Automated confirmation emails to patients and therapists
+- **Admin Dashboard**: Manage and track all consultation requests
 
-## Laravel Sponsors
+### 🎨 Modern Admin Panel
+- **Complete CRUD Operations**: Manage users, therapies, and consultations
+- **Therapy Builder**: Visual interface for creating multi-page therapy content
+- **User Management**: Create and assign therapists to patients
+- **Responsive Dashboard**: Mobile-friendly admin interface
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 🔐 Authentication & Security
+- **Laravel Sanctum**: Secure authentication system
+- **CSRF Protection**: Built-in security measures
+- **Password Hashing**: Secure user credential storage
+- **Policy-based Authorization**: Fine-grained access control
 
-### Premium Partners
+## Technology Stack
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Framework**: Laravel 12.x
+- **PHP**: 8.2+
+- **Database**: SQLite (development), MySQL/PostgreSQL (production)
+- **Frontend**: Blade templates, custom CSS/JS
+- **Icons**: Phosphor Icons
+- **Authentication**: Laravel Sanctum
+- **Email**: Laravel Mail with SMTP support
 
-## Contributing
+## Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- Node.js & NPM (for asset compilation)
+- SQLite (or MySQL/PostgreSQL for production)
 
-## Code of Conduct
+### Setup Instructions
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/jpjacome/passiflor.git
+   cd passiflor-app
+   ```
 
-## Security Vulnerabilities
+2. **Install dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+3. **Environment configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Configure database** (edit `.env`)
+   ```env
+   DB_CONNECTION=sqlite
+   # Or for MySQL:
+   # DB_CONNECTION=mysql
+   # DB_HOST=127.0.0.1
+   # DB_PORT=3306
+   # DB_DATABASE=passiflor
+   # DB_USERNAME=root
+   # DB_PASSWORD=
+   ```
+
+5. **Run migrations**
+   ```bash
+   php artisan migrate
+   ```
+
+6. **Create storage symbolic link**
+   ```bash
+   php artisan storage:link
+   ```
+
+7. **Compile assets**
+   ```bash
+   npm run build
+   ```
+
+8. **Serve the application**
+   ```bash
+   php artisan serve
+   ```
+
+Visit `http://localhost:8000` to access the application.
+
+## Database Schema
+
+### Users Table
+- Roles: `admin`, `therapist`, `patient`, `guest`
+- Therapist assignment for patients via `therapist_id`
+- Standard authentication fields
+
+### Therapies Table
+- Dynamic therapy content management
+- Author and therapist assignment
+- Patient assignment for personalized therapy
+- Published state for draft/live control
+
+### Therapy Pages Table
+- Multi-page therapy content
+- Page types: `hero`, `step`, `info`
+- Position-based ordering
+- Rich content fields (title, subtitle, body, notes)
+
+### Consultations Table
+- Free consultation booking requests
+- Patient information and session preferences
+- Email tracking and consent management
+
+## User Roles & Permissions
+
+### Admin
+- Full access to all features
+- User management (create therapists, patients, admins)
+- Therapy CRUD operations
+- Consultation management
+- System configuration
+
+### Therapist
+- Create and manage therapies
+- View assigned patients
+- Preview unpublished therapies
+- Manage consultations
+
+### Patient
+- View assigned therapies
+- Access published therapy content
+- Book consultations
+
+### Guest
+- View public therapy pages (published only)
+- Book consultations
+- View homepage
+
+## Services Offered
+
+- **Individual Therapy**: Evidence-based personalized therapy adapted to unique healing journeys
+- **Group Sessions**: Community-based supportive environment for shared healing
+- **Online Therapy**: Remote sessions for accessibility
+- **Integrative Therapy**: Holistic approach combining multiple modalities
+- **Psychedelic Therapy**: Guided therapeutic sessions
+- **Microdosing Support**: Professional guidance for microdosing protocols
+- **Autism Support**: Specialized therapy for autism spectrum
+- **Child & Young Adult Therapy**: Age-appropriate therapeutic approaches
+- **Trauma Recovery**: Support for trauma survivors
+- **Parent Support**: Guidance for parents navigating challenges
+
+## Configuration
+
+### Mail Setup
+Configure SMTP settings in `.env`:
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=your-smtp-host
+MAIL_PORT=587
+MAIL_USERNAME=your-username
+MAIL_PASSWORD=your-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=info@passiflor.org
+MAIL_FROM_NAME="Passiflor"
+```
+
+### Application URL
+```env
+APP_URL=https://passiflor.org
+```
+
+## Deployment
+
+Refer to `LARAVEL_SHARED_HOSTING_DEPLOYMENT.md` for detailed deployment instructions for shared hosting environments.
+
+### Quick Production Checklist
+- Set `APP_ENV=production` and `APP_DEBUG=false`
+- Configure production database
+- Set up SSL certificate
+- Configure mail service
+- Run `php artisan config:cache`
+- Run `php artisan route:cache`
+- Run `php artisan view:cache`
+- Set proper file permissions
+
+## Development
+
+### Running Tests
+```bash
+php artisan test
+```
+
+### Code Style
+This project follows Laravel coding standards and uses PHP Pint for code formatting:
+```bash
+./vendor/bin/pint
+```
+
+## Documentation
+
+Additional documentation available in the repository:
+- `ADMIN_PANEL_SETUP.md` - Admin panel implementation details
+- `CONSULTATION_SYSTEM_SUMMARY.md` - Consultation booking system
+- `LOGIN_AUTHENTICATION_IMPLEMENTATION.md` - Authentication system
+- `THERAPIES_IMPLEMENTATION.md` - Therapy management system
+- `LARAVEL_SHARED_HOSTING_DEPLOYMENT.md` - Deployment guide
+
+## Contact
+
+- **Website**: [passiflor.org](https://passiflor.org)
+- **Email**: info@passiflor.com
+- **Phone**: +593 (9) 9064-9181
+- **Instagram**: [@passiflor__](https://www.instagram.com/passiflor__/)
+
+## Credits
+
+Carefully crafted by [DR PIXEL](https://drpixel.it.nf)
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary software. All rights reserved © 2025 Passiflor.
