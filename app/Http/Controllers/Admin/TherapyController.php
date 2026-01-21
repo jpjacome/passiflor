@@ -19,14 +19,32 @@ class TherapyController extends Controller
     }
     public function index()
     {
-        $therapies = Therapy::with(['author','therapist','assignedPatient'])->orderBy('created_at', 'desc')->paginate(12);
+        $user = auth()->user();
+        $query = Therapy::with(['author','therapist','assignedPatient']);
+        
+        // If user is acting as therapist, only show their therapies
+        if ($user->actingAsTherapist()) {
+            $query->where('therapist_id', $user->id);
+        }
+        
+        $therapies = $query->orderBy('created_at', 'desc')->paginate(12);
         return view('admin.therapies.index', compact('therapies'));
     }
 
     public function create()
     {
-        $therapists = \App\Models\User::where('role', 'therapist')->orderBy('name')->get();
-        $patients = \App\Models\User::where('role', 'patient')->orderBy('name')->get();
+        $user = auth()->user();
+        $therapists = \App\Models\User::whereIn('role', ['admin', 'therapist'])->orderBy('name')->get();
+        
+        // If acting as therapist, only show their patients
+        if ($user->actingAsTherapist()) {
+            $patients = \App\Models\User::where('role', 'patient')
+                ->where('therapist_id', $user->id)
+                ->orderBy('name')->get();
+        } else {
+            $patients = \App\Models\User::where('role', 'patient')->orderBy('name')->get();
+        }
+        
         return view('admin.therapies.create', compact('therapists', 'patients'));
     }
 
@@ -74,19 +92,36 @@ class TherapyController extends Controller
         ]);
 
         // handle additional pages (only non-hero types allowed here)
-        if ($request->has('pages')) {
+        if ($request->has('pages') && is_array($request->input('pages'))) {
             foreach ($request->input('pages') as $i => $page) {
+                // Skip empty page entries
+                if (!is_array($page) || empty($page)) {
+                    continue;
+                }
+                
+                $pageType = $page['type'] ?? 'step';
+                
                 $pageData = [
-                    // shift positions by 1 because hero occupies position 0
                     'position' => $i + 1,
-                    'type' => in_array($page['type'] ?? 'step', ['step', 'info']) ? $page['type'] : 'step',
+                    'type' => in_array($pageType, ['step', 'info']) ? $pageType : 'step',
                     'number' => $page['number'] ?? null,
                     'title' => $page['title'] ?? null,
                     'subtitle' => $page['subtitle'] ?? null,
-                    'body' => $page['body'] ?? null,
-                    'list_items' => isset($page['list_items']) ? array_values(array_filter($page['list_items'])) : null,
                     'note' => $page['note'] ?? null,
                 ];
+                
+                // Handle content based on type
+                if ($pageType === 'info') {
+                    // Info pages have paragraph text in body
+                    $pageData['body'] = $page['body'] ?? null;
+                    $pageData['list_items'] = null;
+                } else {
+                    // Step pages have list items
+                    $pageData['body'] = null;
+                    $pageData['list_items'] = isset($page['list_items']) && is_array($page['list_items']) 
+                        ? array_values(array_filter($page['list_items'])) 
+                        : null;
+                }
 
                 $therapy->pages()->create($pageData);
             }
@@ -98,9 +133,75 @@ class TherapyController extends Controller
     public function edit(Therapy $therapy)
     {
         $therapy->load('pages');
-        $therapists = \App\Models\User::where('role', 'therapist')->orderBy('name')->get();
-        $patients = \App\Models\User::where('role', 'patient')->orderBy('name')->get();
+        $user = auth()->user();
+        $therapists = \App\Models\User::whereIn('role', ['admin', 'therapist'])->orderBy('name')->get();
+        
+        // If acting as therapist, only show their patients
+        if ($user->actingAsTherapist()) {
+            $patients = \App\Models\User::where('role', 'patient')
+                ->where('therapist_id', $user->id)
+                ->orderBy('name')->get();
+        } else {
+            $patients = \App\Models\User::where('role', 'patient')->orderBy('name')->get();
+        }
+        
         return view('admin.therapies.edit', compact('therapy', 'therapists', 'patients'));
+    }
+
+    /**
+     * Show EMDR assignment UI (admin-facing)
+     */
+    public function emdr()
+    {
+        $user = auth()->user();
+        $therapists = \App\Models\User::whereIn('role', ['admin', 'therapist'])->orderBy('name')->get();
+
+        if ($user->actingAsTherapist()) {
+            $patients = \App\Models\User::where('role', 'patient')
+                ->where('therapist_id', $user->id)
+                ->orderBy('name')->get();
+        } else {
+            $patients = \App\Models\User::where('role', 'patient')->orderBy('name')->get();
+        }
+
+        return view('admin.therapies.emdr', compact('therapists', 'patients'));
+    }
+
+    /**
+     * Handle assignment form from EMDR page.
+     */
+    public function assign(Request $request)
+    {
+        // Normalize empty strings to null so nullable validation works as expected
+        $request->merge([
+            'therapist_id' => $request->input('therapist_id') ?: null,
+            'patient_id' => $request->input('patient_id') ?: null,
+        ]);
+
+        $data = $request->validate([
+            'therapist_id' => 'nullable|exists:users,id',
+            'patient_id' => 'nullable|exists:users,id',
+        ]);
+
+        $therapist = $data['therapist_id'] ? \App\Models\User::find($data['therapist_id']) : null;
+        $patient = $data['patient_id'] ? \App\Models\User::find($data['patient_id']) : null;
+
+        $msg = 'Asignación guardada.';
+        if ($therapist || $patient) {
+            $names = [];
+            if ($therapist) $names[] = 'Terapeuta: ' . $therapist->name;
+            if ($patient) $names[] = 'Paciente: ' . $patient->name;
+            $msg = 'Asignación guardada (' . implode(' / ', $names) . ')';
+        }
+
+        // Flash selected ids and names so the EMDR admin page can prefill controls
+        return redirect()->route('admin.emdr')->with([
+            'success' => $msg,
+            'therapist_id' => $therapist?->id,
+            'therapist_name' => $therapist?->name,
+            'patient_id' => $patient?->id,
+            'patient_name' => $patient?->name,
+        ]);
     }
 
     public function update(Request $request, Therapy $therapy)
@@ -153,22 +254,40 @@ class TherapyController extends Controller
         }
 
         // pages: preserve existing pages when possible, update or create new ones
-        if ($request->has('pages')) {
+        if ($request->has('pages') && is_array($request->input('pages'))) {
             $incoming = $request->input('pages');
             $keptIds = $heroPage ? [$heroPage->id] : [];
 
             foreach ($incoming as $i => $page) {
-                // positions start at 1 because hero is position 0
+                // Skip empty page entries
+                if (!is_array($page) || empty($page)) {
+                    continue;
+                }
+                
+                $pageType = $page['type'] ?? 'step';
+                
+                // Base attributes
                 $pageAttrs = [
                     'position' => $i + 1,
-                    'type' => in_array($page['type'] ?? 'step', ['step', 'info']) ? $page['type'] : 'step',
+                    'type' => in_array($pageType, ['step', 'info']) ? $pageType : 'step',
                     'number' => $page['number'] ?? null,
                     'title' => $page['title'] ?? null,
                     'subtitle' => $page['subtitle'] ?? null,
-                    'body' => $page['body'] ?? null,
-                    'list_items' => isset($page['list_items']) ? array_values(array_filter($page['list_items'])) : null,
                     'note' => $page['note'] ?? null,
                 ];
+                
+                // Handle content based on type
+                if ($pageType === 'info') {
+                    // Info pages have paragraph text in body
+                    $pageAttrs['body'] = $page['body'] ?? null;
+                    $pageAttrs['list_items'] = null;
+                } else {
+                    // Step pages have list items
+                    $pageAttrs['body'] = null;
+                    $pageAttrs['list_items'] = isset($page['list_items']) && is_array($page['list_items']) 
+                        ? array_values(array_filter($page['list_items'])) 
+                        : null;
+                }
 
                 if (!empty($page['id'])) {
                     $pageModel = TherapyPage::find($page['id']);
